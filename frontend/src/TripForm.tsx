@@ -5,7 +5,7 @@ import type { Interval, Place, PlanRequest } from './types'
 type Props = {
   loading: boolean
   hasPlan: boolean
-  onSubmit: (req: PlanRequest) => void
+  onSubmit: (req: PlanRequest, title: string) => void
 }
 
 const INTERVALS: Interval[] = [10, 25, 50]
@@ -16,6 +16,8 @@ function toLocalInput(d: Date) {
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
+
+const shortName = (p: Place) => p.label.split(',')[0]
 
 function nextHour() {
   const d = new Date()
@@ -47,7 +49,7 @@ export default function TripForm({ loading, hasPlan, onSubmit }: Props) {
       departure: new Date(departure).toISOString(),
       weight_lb: weightLb,
       interval_mi: withInterval,
-    })
+    }, `${shortName(origin)} to ${shortName(destination)}`)
   }
 
 

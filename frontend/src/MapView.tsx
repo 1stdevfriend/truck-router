@@ -29,6 +29,7 @@ export default function MapView({ plan, selected, onSelect }: Props) {
   const [supported] = useState(hasWebGL2)
   const [ready, setReady] = useState(false)
   const [hour, setHour] = useState(0)
+  const [playing, setPlaying] = useState(false)
   // Map handlers are bound once; they read the current props through this ref.
   const latest = useRef({ plan, selected, onSelect })
   useEffect(() => {
@@ -55,9 +56,9 @@ export default function MapView({ plan, selected, onSelect }: Props) {
         source: 'heat',
         paint: {
           'heatmap-weight': heatWeight(0),
-          // ~1.5x the 0.5-degree point spacing at every zoom, so cells blend without stacking up.
-          'heatmap-radius': ['interpolate', ['exponential', 2], ['zoom'], 3, 9, 10, 1152],
-          'heatmap-opacity': 0.6,
+          // ~2x the 0.5-degree point spacing at every zoom, so cells blend without stacking up.
+          'heatmap-radius': ['interpolate', ['exponential', 2], ['zoom'], 3, 11, 10, 1408],
+          'heatmap-opacity': 0.8,
           'heatmap-color': [
             'interpolate',
             ['linear'],
@@ -169,15 +170,23 @@ export default function MapView({ plan, selected, onSelect }: Props) {
       })),
     })
     setHour(0)
+    setPlaying(false)
     if (!plan) return
     const bounds = new maplibregl.LngLatBounds()
     for (const r of plan.routes) for (const c of r.geometry) bounds.extend(c)
-    map.fitBounds(bounds, { padding: 48 })
+    map.fitBounds(bounds, { padding: { top: 48, right: 48, left: 48, bottom: 200 } }) // keep routes clear of the hour panel
   }, [ready, plan])
 
   useEffect(() => {
     if (ready) mapRef.current?.setPaintProperty('heat', 'heatmap-weight', heatWeight(hour))
   }, [ready, hour])
+
+  // Play steps through the 48 hours and loops, so the weather can be watched moving across the routes.
+  useEffect(() => {
+    if (!playing) return
+    const t = setInterval(() => setHour((h) => (h >= HOURS ? 0 : h + 1)), 450)
+    return () => clearInterval(t)
+  }, [playing])
 
   const at = plan && formatTime(new Date(Date.parse(plan.departure) + hour * 3_600_000).toISOString())
 
@@ -190,19 +199,40 @@ export default function MapView({ plan, selected, onSelect }: Props) {
       )}
       {plan && (
         <div className="map-panel">
-          <label className="hour">
-            <span>
-              Weather risk at <strong>{at}</strong> (+{hour} h)
-            </span>
-            <input
-              type="range"
-              min={0}
-              max={HOURS}
-              value={hour}
-              aria-valuetext={`${at}, ${hour} hours after departure`}
-              onChange={(e) => setHour(Number(e.target.value))}
-            />
-          </label>
+          <div className="hour-head">
+            <button
+              type="button"
+              className="play"
+              aria-pressed={playing}
+              aria-label={playing ? 'Pause forecast' : 'Play forecast'}
+              onClick={() => setPlaying((p) => !p)}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                {playing ? <path d="M7 5h4v14H7zM13 5h4v14h-4z" /> : <path d="M7 4.5v15l12.5-7.5z" />}
+              </svg>
+            </button>
+            <label htmlFor="hour">
+              Risk at <strong>{at}</strong>
+              <span className="plus">+{hour} h</span>
+            </label>
+          </div>
+          <input
+            id="hour"
+            type="range"
+            min={0}
+            max={HOURS}
+            value={hour}
+            aria-valuetext={`${at}, ${hour} hours after departure`}
+            onChange={(e) => {
+              setPlaying(false)
+              setHour(Number(e.target.value))
+            }}
+          />
+          <div className="ticks" aria-hidden="true">
+            {[0, 12, 24, 36, 48].map((h) => (
+              <span key={h}>{h === 0 ? 'Departure' : `+${h} h`}</span>
+            ))}
+          </div>
           <ul className="legend" aria-label="Risk colours">
             {RISK_LEVELS.map((l) => (
               <li key={l}>
@@ -211,7 +241,6 @@ export default function MapView({ plan, selected, onSelect }: Props) {
               </li>
             ))}
           </ul>
-          <p className="legend-note">Shading shows the risk around the routes at that hour.</p>
         </div>
       )}
     </div>
