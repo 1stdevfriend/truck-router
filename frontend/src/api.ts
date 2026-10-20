@@ -1,5 +1,8 @@
 import type { Place, Plan, PlanRequest } from './types'
 
+// Production points at the Railway API; dev leaves it empty and uses the Vite proxy.
+const API_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '')
+
 /** Turn a DRF error body ({"field": ["msg"]} or {"error": "msg"}) into one readable line. */
 function errorMessage(body: unknown, status: number): string {
   if (body && typeof body === 'object') {
@@ -15,7 +18,7 @@ function errorMessage(body: unknown, status: number): string {
 }
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, init)
+  const res = await fetch(API_URL + url, init)
   const body = await res.json().catch(() => null)
   if (!res.ok) throw new Error(errorMessage(body, res.status))
   return body as T
