@@ -21,15 +21,24 @@ def route(steps, distance_m=TOTAL_M, duration_s=5400):
 TWO_SPEEDS = route([Step(TOTAL_M / 2, 1800, 0, 5), Step(TOTAL_M / 2, 3600, 5, 10)])
 
 
-def test_checkpoints_every_interval_plus_destination():
+def test_checkpoints_at_origin_every_interval_and_destination():
     cps = sample_checkpoints(TWO_SPEEDS, 10, DEPART)
-    assert [round(c.mile) for c in cps] == [10, 20, 30, 40, 50, 60, 69]
-    assert cps[-1].segment_miles == pytest.approx(TOTAL_MI - 60, abs=0.01)
+    assert [round(c.mile) for c in cps] == [0, 10, 20, 30, 40, 50, 60, 69]
+    assert (cps[0].lon, cps[0].lat, cps[0].eta) == (0.0, 0.0, DEPART)
     assert sum(c.segment_miles for c in cps) == pytest.approx(TOTAL_MI, abs=0.01)
 
 
+def test_each_checkpoint_covers_half_the_gap_on_each_side():
+    cps = sample_checkpoints(TWO_SPEEDS, 10, DEPART)
+    assert cps[0].segment_miles == pytest.approx(5)  # origin: only the road ahead
+    assert cps[1].segment_miles == pytest.approx(10)
+    last_gap = TOTAL_MI - 60
+    assert cps[-2].segment_miles == pytest.approx(5 + last_gap / 2, abs=0.01)
+    assert cps[-1].segment_miles == pytest.approx(last_gap / 2, abs=0.01)
+
+
 def test_checkpoint_position_is_interpolated_along_the_line():
-    cp = sample_checkpoints(TWO_SPEEDS, 25, DEPART)[0]
+    cp = sample_checkpoints(TWO_SPEEDS, 25, DEPART)[1]
     assert cp.lat == pytest.approx(0.0)
     assert cp.lon == pytest.approx(25 / TOTAL_MI, rel=1e-3)
 
@@ -44,10 +53,10 @@ def test_eta_follows_each_steps_speed():
     assert cps[69].eta == DEPART + timedelta(seconds=5400)
 
 
-def test_interval_longer_than_route_gives_destination_only():
-    (cp,) = sample_checkpoints(TWO_SPEEDS, 100, DEPART)
-    assert cp.segment_miles == pytest.approx(TOTAL_MI, abs=0.01)
-    assert (cp.lon, cp.lat) == (1.0, 0.0)
+def test_interval_longer_than_route_gives_origin_and_destination_halves():
+    origin, dest = sample_checkpoints(TWO_SPEEDS, 100, DEPART)
+    assert (origin.lon, dest.lon) == (0.0, 1.0)
+    assert origin.segment_miles == dest.segment_miles == pytest.approx(TOTAL_MI / 2, abs=0.01)
 
 
 def test_miles_scaled_to_ors_distance_and_no_steps_falls_back_to_even_speed():
@@ -55,4 +64,4 @@ def test_miles_scaled_to_ors_distance_and_no_steps_falls_back_to_even_speed():
     r = route([], distance_m=TOTAL_M * 1.1, duration_s=3600)
     cps = sample_checkpoints(r, 50, DEPART)
     assert cps[-1].mile == pytest.approx(TOTAL_MI * 1.1, abs=0.01)
-    assert cps[0].eta == pytest.approx(DEPART + timedelta(seconds=3600 * 50 / (TOTAL_MI * 1.1)), abs=timedelta(seconds=1))
+    assert cps[1].eta == pytest.approx(DEPART + timedelta(seconds=3600 * 50 / (TOTAL_MI * 1.1)), abs=timedelta(seconds=1))

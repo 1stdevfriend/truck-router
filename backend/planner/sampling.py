@@ -1,7 +1,8 @@
 """Weather checkpoints every N road-miles along a route, with the truck's ETA at each.
 
-Each checkpoint stands for the stretch of road that ends at it, so
-`segment_miles` is how many miles its weather risk counts for.
+Checkpoints sit at mile 0, N, 2N, ... and the destination. Each one stands
+for the road around it, half the gap to each neighbour, so `segment_miles`
+is how many miles its weather risk counts for.
 """
 
 from bisect import bisect_left
@@ -47,10 +48,10 @@ def _vertex_profile(route: Route) -> tuple[list[float], list[float]]:
 def sample_checkpoints(route: Route, interval_mi: float, departure: datetime) -> list[Checkpoint]:
     miles, seconds = _vertex_profile(route)
     total = miles[-1]
-    targets = [interval_mi * k for k in range(1, int(total // interval_mi) + 1) if interval_mi * k < total] + [total]
+    targets = [interval_mi * k for k in range(int(total // interval_mi) + 1) if interval_mi * k < total] + [total]
 
-    checkpoints, prev = [], 0.0
-    for target in targets:
+    checkpoints = []
+    for n, target in enumerate(targets):
         i = max(1, bisect_left(miles, target))  # vertex i is the first at/after target
         span = miles[i] - miles[i - 1]
         f = (target - miles[i - 1]) / span if span else 0.0
@@ -62,8 +63,14 @@ def sample_checkpoints(route: Route, interval_mi: float, departure: datetime) ->
                 lon=lon0 + f * (lon1 - lon0),
                 lat=lat0 + f * (lat1 - lat0),
                 eta=departure + timedelta(seconds=elapsed),
-                segment_miles=round(target - prev, 2),
+                segment_miles=round(_coverage(targets, n), 2),
             )
         )
-        prev = target
     return checkpoints
+
+
+def _coverage(targets: list[float], n: int) -> float:
+    """Half the gap to the previous checkpoint plus half the gap to the next."""
+    before = (targets[n] - targets[n - 1]) / 2 if n > 0 else 0.0
+    after = (targets[n + 1] - targets[n]) / 2 if n + 1 < len(targets) else 0.0
+    return before + after

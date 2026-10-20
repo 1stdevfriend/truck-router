@@ -12,7 +12,7 @@
 | Heatmap | Composite risk on a grid around all routes, hours 0–48 from departure |
 | Frontend | Vite + React + TypeScript + MapLibre GL (OpenFreeMap tiles) |
 | Backend | Python 3.12 (uv), Django 5 + DRF, pytest |
-| Hosting | Render, one service (Django serves the React build) |
+| Hosting | Vercel (React) + Railway (Django, gunicorn), linked by CORS |
 | Git | Handled by the user |
 
 ## Checkpoints
@@ -31,9 +31,10 @@ Each one ends with a demo you can run. We don't move on until you approve it.
 10. **Heatmap data** — corridor grid around the routes, one 0–48 h Open-Meteo fetch, compact risk matrix `[point][hour]`.
 11. **Heatmap + slider UI** — MapLibre heatmap layer; the slider swaps data client-side (no refetch), plus a legend.
 12. **Polish + README** — perf pass, edge cases (bad address, no route, forecast horizon), responsive layout, docs.
-13. **Deploy to Render** — WhiteNoise + gunicorn, build script, env vars; smoke-test the live URL; Loom talking points.
+13. **Deploy** — Railway (gunicorn, `CORS_ALLOWED_ORIGINS`) + Vercel (`VITE_API_URL`); smoke-test the live URLs; Loom talking points. *(Done early, after checkpoint 8; redeploy after each later checkpoint.)*
 
 ## Open interpretation notes
 - Band edges overlap in the PDF (e.g. rain 0.25 is listed as both Moderate and High). Rule: the lower bound is inclusive, so 0.25 → High.
 - The load rules apply to wind only. A checkpoint's level is the worst of wind+load, rain and snow.
-- Each checkpoint stands for the segment that ends at it, so its level counts for that segment's miles.
+- Checkpoints sit at mile 0, N, 2N, … and the destination. Each covers half the gap to each neighbour, and its level counts for those miles.
+- The heatmap slider's hour 0 is the departure time, so it lines up with the checkpoint ETAs.

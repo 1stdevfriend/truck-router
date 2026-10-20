@@ -27,11 +27,11 @@ export default function App() {
   const best = plan?.routes[plan.recommended]
 
   return (
-    <div className="layout">
-      <aside className="panel">
-        <header>
-          <h1>Truck Route Weather</h1>
-          <p className="sub">Compare 3 truck routes by weather risk along the way.</p>
+    <>
+      <main className="page">
+        <header className="hero">
+          <h1>Plan a safer route</h1>
+          <p className="sub">Compare 3 truck routes by weather risk, load weight and travel time.</p>
         </header>
 
         <TripForm loading={loading} hasPlan={!!plan} onSubmit={runPlan} />
@@ -56,10 +56,11 @@ export default function App() {
             </section>
           )}
         </div>
-      </aside>
-      <main className="map-wrap">
-        <MapView />
       </main>
-    </div>
+
+      <section className="map-section" aria-label="Route map">
+        <MapView />
+      </section>
+    </>
   )
 }

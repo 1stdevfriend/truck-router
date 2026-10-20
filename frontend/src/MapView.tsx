@@ -2,7 +2,7 @@ import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useEffect, useRef, useState } from 'react'
 
-const STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty'
+const STYLE_URL = 'https://tiles.openfreemap.org/styles/fiord' // navy basemap to match the page
 
 // MapLibre throws without WebGL2 (old device, or hardware acceleration off);
 // check first so the rest of the app stays usable.
