@@ -93,3 +93,21 @@ def test_alternatives_only_requested_for_short_trips(settings):
         seen.clear()
         ors.get_routes([-96.80, 32.78], [-97.33, 32.76], 40_000)  # Dallas -> Fort Worth
         assert "Alternative" in seen
+
+
+def ors_reply(status, body):
+    res = mock.Mock(status_code=status)
+    res.json.return_value = body
+    return mock.patch.object(ors.requests, "request", return_value=res)
+
+
+def test_known_ors_errors_are_reworded_others_pass_through():
+    with ors_reply(404, {"error": {"code": 2010, "message": "Could not find routable point ..."}}):
+        with pytest.raises(ors.ORSError, match="isn't near a road"):
+            ors._get("/x", {})
+    with ors_reply(500, {"error": {"code": 9999, "message": "boom"}}):
+        with pytest.raises(ors.ORSError, match="Routing service error: boom"):
+            ors._get("/x", {})
+    with ors_reply(503, "not json"):
+        with pytest.raises(ors.ORSError, match="HTTP 503"):
+            ors._get("/x", {})

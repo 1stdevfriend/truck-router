@@ -36,6 +36,14 @@ def _cache_key(*parts) -> str:
     return "ors:" + hashlib.sha1(repr(parts).encode()).hexdigest()
 
 
+# ORS error codes a user can cause, reworded; anything else passes through as-is.
+PLAIN_ERRORS = {
+    2004: "That trip is too long to route. Truck routes are limited to about 3,700 miles.",
+    2009: "No truck route connects these two places.",
+    2010: "One of the places isn't near a road. Pick a street address or town instead.",
+}
+
+
 class ORSError(Exception):
     pass
 
@@ -70,10 +78,11 @@ def _call(method, path, timeout, **kwargs):
         raise ORSError(f"Routing service unreachable: {exc.__class__.__name__}") from exc
     if res.status_code != 200:
         try:
-            message = res.json()["error"]["message"]
-        except (ValueError, KeyError, TypeError):
-            message = f"HTTP {res.status_code}"
-        raise ORSError(f"Routing service error: {message}")
+            error = res.json()["error"]
+            code, message = error.get("code"), error["message"]
+        except (ValueError, KeyError, TypeError, AttributeError):
+            code, message = None, f"HTTP {res.status_code}"
+        raise ORSError(PLAIN_ERRORS.get(code, f"Routing service error: {message}"))
     return res.json()
 
 
