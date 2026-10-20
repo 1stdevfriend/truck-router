@@ -7,7 +7,7 @@ fewest Severe miles, fewest High miles, lowest average risk, shortest time.
 from dataclasses import dataclass
 from datetime import datetime
 
-from . import ors, weather
+from . import heatmap, ors, weather
 from .risk import Risk, assess
 from .sampling import sample_checkpoints
 
@@ -97,10 +97,11 @@ def explain(best: Scored, runner_up: Scored | None) -> str:
 def build_plan(origin, destination, departure: datetime, weight_lb: float, interval_mi: int) -> dict:
     routes = ors.get_routes(origin, destination, weight_lb)
 
-    # One weather fetch for every checkpoint on every route.
+    # One weather fetch for every checkpoint on every route and the heatmap corridor.
     sampled = [sample_checkpoints(r, interval_mi, departure) for r in routes]
     start, end = weather.forecast_window(departure, max(cps[-1].eta for cps in sampled))
-    cells = {weather.cell_of(cp.lon, cp.lat) for cps in sampled for cp in cps}
+    heat_cells = heatmap.corridor(r.coords for r in routes)
+    cells = {weather.cell_of(cp.lon, cp.lat) for cps in sampled for cp in cps} | heat_cells
     series = weather.fetch(cells, start, end)
 
     scored = [score_route(r, cps, series, weight_lb) for r, cps in zip(routes, sampled)]
@@ -137,4 +138,5 @@ def build_plan(origin, destination, departure: datetime, weight_lb: float, inter
             }
             for i, s in enumerate(scored)
         ],
+        "heatmap": heatmap.risk_matrix(heat_cells, series, departure, weight_lb),
     }

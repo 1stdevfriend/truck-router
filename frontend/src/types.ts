@@ -49,4 +49,8 @@ export type Plan = {
   reason: string
   warnings: string[]
   routes: RouteResult[]
+  heatmap: {
+    points: [number, number][]
+    risk: number[][] // [point][hour 0..48], level 0 (Low) to 4 (No Travel)
+  }
 }
