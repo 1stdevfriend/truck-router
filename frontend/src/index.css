@@ -431,3 +431,37 @@ button:disabled {
   line-height: 1.5;
   color: var(--field-text);
 }
+
+/* ---- loading ---- */
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 32px 0 0;
+  font-size: 16px;
+  text-align: center;
+}
+
+.spinner {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgb(255 255 255 / 0.2);
+  border-top-color: var(--strong);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.4s;
+  }
+}

@@ -85,7 +85,6 @@ export default function TripForm({ loading, hasPlan, onSubmit }: Props) {
             inputMode="numeric"
             min={1}
             max={150000}
-            step={500}
             required
             value={weight}
             aria-invalid={!weightOk}

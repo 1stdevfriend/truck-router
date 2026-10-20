@@ -1,15 +1,20 @@
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import { useEffect, useRef, useState } from 'react'
 import { formatTime, RISK_COLOR, RISK_LABEL, RISK_LEVELS, ROUTE_COLORS } from './display'
 import type { Plan } from './types'
+
+// MapLibre looks for its worker next to its own module, which the production bundle doesn't ship; point it at the emitted copy.
+maplibregl.setWorkerUrl(workerUrl)
 
 const STYLE_URL = 'https://tiles.openfreemap.org/styles/fiord' // navy basemap to match the page
 const EMPTY = { type: 'FeatureCollection' as const, features: [] }
 const HOURS = 48 // heatmap covers departure (hour 0) to +48 h
 
 // Each heatmap point carries every hour's level as h0..h48; the slider only swaps which one is weighted.
-const heatWeight = (hour: number) => ['/', ['get', `h${hour}`], 4] as maplibregl.ExpressionSpecification
+// Low still gets a little weight so the corridor shows faint green instead of nothing.
+const heatWeight = (hour: number) => ['/', ['+', ['get', `h${hour}`], 1], 5] as maplibregl.ExpressionSpecification
 
 // MapLibre throws without WebGL2 (old device, or hardware acceleration off);
 // check first so the rest of the app stays usable.
@@ -59,11 +64,13 @@ export default function MapView({ plan, selected, onSelect }: Props) {
             ['heatmap-density'],
             0,
             'rgba(0, 0, 0, 0)',
-            0.25,
+            0.2,
+            RISK_COLOR.low,
+            0.4,
             RISK_COLOR.moderate,
-            0.5,
+            0.6,
             RISK_COLOR.high,
-            0.75,
+            0.8,
             RISK_COLOR.severe,
             1,
             RISK_COLOR.no_travel,
@@ -204,7 +211,7 @@ export default function MapView({ plan, selected, onSelect }: Props) {
               </li>
             ))}
           </ul>
-          <p className="legend-note">Shading shows risk around the routes at that hour; no shading means Low.</p>
+          <p className="legend-note">Shading shows the risk around the routes at that hour.</p>
         </div>
       )}
     </div>

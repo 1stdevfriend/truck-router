@@ -16,6 +16,7 @@ export default function App() {
     const id = ++latest.current
     setLoading(true)
     setError(null)
+    setPlan(null) // don't show the previous trip while the new one loads
     try {
       const result = await fetchPlan(req)
       if (id === latest.current) {
@@ -42,6 +43,12 @@ export default function App() {
         <TripForm loading={loading} hasPlan={!!plan} onSubmit={runPlan} />
 
         <div aria-live="polite">
+          {loading && (
+            <p className="loading" role="status">
+              <span className="spinner" aria-hidden="true" />
+              Planning routes and checking the weather along each one. This can take up to a minute.
+            </p>
+          )}
           {error && (
             <p className="alert error" role="alert">
               {error}
