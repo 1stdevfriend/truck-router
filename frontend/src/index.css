@@ -376,20 +376,42 @@ button:disabled {
 
 /* ---- map legend + popups ---- */
 
-.legend {
+.map-panel {
   position: absolute;
   bottom: 12px;
   left: 12px;
+  display: grid;
+  gap: 8px;
+  width: min(380px, 100% - 24px);
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--strong);
+  background: rgb(11 26 44 / 0.88);
+  border-radius: 8px;
+}
+
+.hour {
+  display: grid;
+  gap: 6px;
+}
+
+.hour input {
+  width: 100%;
+  accent-color: var(--selected);
+}
+
+.legend {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 12px;
   margin: 0;
-  padding: 8px 12px;
-  font-size: 13px;
-  color: var(--strong);
+  padding: 0;
   list-style: none;
-  background: rgb(11 26 44 / 0.85);
-  border-radius: 8px;
+}
+
+.legend-note {
+  margin: 0;
+  color: var(--text);
 }
 
 .legend li {
