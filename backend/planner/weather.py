@@ -5,6 +5,7 @@ own resolution) so nearby checkpoints, overlapping routes and the heatmap
 share one cached series per cell.
 """
 
+import logging
 import math
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -13,6 +14,7 @@ import requests
 from django.core.cache import cache
 
 URL = "https://api.open-meteo.com/v1/forecast"
+log = logging.getLogger(__name__)
 TIMEOUT = (5, 30)
 GRID = 10  # cells per degree
 BATCH = 250  # locations per request; keeps the URL ~4 KB
@@ -71,8 +73,10 @@ def _request(cells: list, start: datetime, end: datetime) -> list[dict]:
     try:
         res = requests.get(URL, params=params, timeout=TIMEOUT)
     except requests.RequestException as exc:
+        log.warning("Open-Meteo unreachable (%d locations): %s", len(cells), exc.__class__.__name__)
         raise WeatherError(UNAVAILABLE) from exc
     if res.status_code in (429, 502, 503, 504):
+        log.warning("Open-Meteo returned HTTP %s (%d locations): %s", res.status_code, len(cells), res.text[:200])
         raise WeatherError(UNAVAILABLE)
     if res.status_code != 200:
         try:
