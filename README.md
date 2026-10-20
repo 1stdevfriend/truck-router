@@ -1,4 +1,4 @@
-# Truck Route Weather
+# Truck Router
 
 Compare 3 truck routes between two US places by the weather risk a truck will meet along each one. The risk takes into account where the truck will be at each hour, and how heavy its load is.
 

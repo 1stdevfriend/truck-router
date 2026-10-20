@@ -36,9 +36,12 @@ def _cache_key(*parts) -> str:
     return "ors:" + hashlib.sha1(repr(parts).encode()).hexdigest()
 
 
+UNAVAILABLE = "The routing service isn't responding right now. Try again in a few minutes."
+DOWN_STATUSES = {429, 502, 503, 504}  # rate-limited or down: worth retrying later, not the user's input
+
 # ORS error codes a user can cause, reworded; anything else passes through as-is.
 PLAIN_ERRORS = {
-    2004: "That trip is too long to route. Truck routes are limited to about 3,700 miles.",
+    2004: "That trip is too long to route.",
     2009: "No truck route connects these two places.",
     2010: "One of the places isn't near a road. Pick a street address or town instead.",
 }
@@ -75,7 +78,11 @@ def _call(method, path, timeout, **kwargs):
             method, BASE_URL + path, headers={"Authorization": settings.ORS_API_KEY}, timeout=timeout, **kwargs
         )
     except requests.RequestException as exc:
-        raise ORSError(f"Routing service unreachable: {exc.__class__.__name__}") from exc
+        log.warning("ORS %s unreachable: %s", path, exc.__class__.__name__)
+        raise ORSError(UNAVAILABLE) from exc
+    if res.status_code in DOWN_STATUSES:
+        log.warning("ORS %s returned HTTP %s", path, res.status_code)
+        raise ORSError(UNAVAILABLE)
     if res.status_code != 200:
         try:
             error = res.json()["error"]

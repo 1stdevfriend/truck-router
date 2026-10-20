@@ -47,14 +47,11 @@ export default function App() {
             <circle cx="40" cy="39.5" r="2.8" />
           </g>
         </svg>
-        Truck Route Weather
+        Truck Router
       </header>
 
       <main className="intro">
-        <h1>Plan a safer route</h1>
-        <p className="lede">
-          Compare 3 truck routes by the weather your load will meet along each one, at the hour the truck gets there.
-        </p>
+        <h1>Pre-plan your route</h1>
 
         <TripForm loading={loading} hasPlan={!!plan} onSubmit={runPlan} />
 

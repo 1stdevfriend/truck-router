@@ -108,6 +108,15 @@ def test_known_ors_errors_are_reworded_others_pass_through():
     with ors_reply(500, {"error": {"code": 9999, "message": "boom"}}):
         with pytest.raises(ors.ORSError, match="Routing service error: boom"):
             ors._get("/x", {})
-    with ors_reply(503, "not json"):
-        with pytest.raises(ors.ORSError, match="HTTP 503"):
+    with ors_reply(500, "not json"):
+        with pytest.raises(ors.ORSError, match="HTTP 500"):
+            ors._get("/x", {})
+
+
+def test_timeouts_and_outages_ask_to_retry_later():
+    with mock.patch.object(ors.requests, "request", side_effect=ors.requests.ReadTimeout()):
+        with pytest.raises(ors.ORSError, match="Try again in a few minutes"):
+            ors._get("/x", {})
+    with ors_reply(504, None):
+        with pytest.raises(ors.ORSError, match="Try again in a few minutes"):
             ors._get("/x", {})

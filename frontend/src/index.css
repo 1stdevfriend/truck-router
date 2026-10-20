@@ -85,30 +85,27 @@ h3 {
 }
 
 .intro {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   width: min(880px, 100% - 32px);
   margin: 0 auto;
-  padding: 40px 0 72px;
+  padding: 0 0 clamp(24px, 6vh, 72px);
 }
 
+/* Sizes follow viewport height too, so the form fits one screen without scrolling. */
 .intro h1 {
-  margin: 0;
-  font-size: clamp(56px, 10vw, 112px);
+  margin: 0 0 clamp(16px, 4.5vh, 44px);
+  font-size: clamp(40px, min(10vw, 11vh), 112px);
   text-transform: uppercase;
   letter-spacing: -0.01em;
-}
-
-.lede {
-  max-width: 34em;
-  margin: 16px 0 44px;
-  font-size: 20px;
-  font-weight: 500;
-  color: var(--ink-soft);
 }
 
 .trip-form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 22px 20px;
+  gap: clamp(12px, 2.4vh, 22px) 20px;
 }
 
 .row {
@@ -132,7 +129,7 @@ input[type='number'],
 input[type='datetime-local'] {
   width: 100%;
   min-width: 0;
-  padding: 14px 16px;
+  padding: clamp(10px, 1.6vh, 14px) 16px;
   font: inherit;
   font-size: 17px;
   font-weight: 500;
@@ -234,7 +231,7 @@ input:disabled {
 
 .segmented span {
   display: block;
-  padding: 12px 0;
+  padding: clamp(9px, 1.4vh, 12px) 0;
   font-weight: 600;
   text-align: center;
   background: var(--paper);
@@ -263,8 +260,8 @@ button {
 button.primary {
   grid-column: 1 / -1;
   justify-self: start;
-  margin-top: 8px;
-  padding: 16px 40px;
+  margin-top: 4px;
+  padding: clamp(12px, 1.8vh, 16px) 40px;
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 22px;
   font-weight: 700;
@@ -295,8 +292,8 @@ button:disabled {
   cursor: not-allowed;
 }
 
-.outcome {
-  margin-top: 28px;
+.outcome:not(:empty) {
+  margin-top: clamp(14px, 2.5vh, 28px);
 }
 
 .alert {
@@ -910,12 +907,25 @@ button:disabled {
 
 @media (max-width: 760px) {
   .topbar {
-    padding: 16px;
+    padding: 12px 16px;
   }
 
   .intro {
-    padding-top: 16px;
+    padding-bottom: 16px;
   }
+
+  .intro h1 {
+    margin-bottom: 20px;
+  }
+
+  .field {
+    gap: 6px;
+  }
+
+  .segmented legend {
+    margin-bottom: 6px;
+  }
+
 
   .trip-form {
     grid-template-columns: minmax(0, 1fr);

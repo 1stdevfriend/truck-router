@@ -22,6 +22,9 @@ FORECAST_DAYS = 16  # Open-Meteo's forecast horizon
 # ponytail: the free tier allows ~10k location-calls/day; caching per cell is the only throttle. Add a paid key if the hosted demo hits the cap.
 
 
+UNAVAILABLE = "The weather service isn't responding right now. Try again in a few minutes."
+
+
 class WeatherError(Exception):
     pass
 
@@ -68,7 +71,9 @@ def _request(cells: list, start: datetime, end: datetime) -> list[dict]:
     try:
         res = requests.get(URL, params=params, timeout=TIMEOUT)
     except requests.RequestException as exc:
-        raise WeatherError(f"Weather service unreachable: {exc.__class__.__name__}") from exc
+        raise WeatherError(UNAVAILABLE) from exc
+    if res.status_code in (429, 502, 503, 504):
+        raise WeatherError(UNAVAILABLE)
     if res.status_code != 200:
         try:
             reason = res.json()["reason"]

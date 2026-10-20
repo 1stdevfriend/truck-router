@@ -43,10 +43,6 @@ export default function TruckLoader() {
         </g>
       </svg>
       <h2>Planning your routes</h2>
-      <p>
-        Finding 3 truck routes and checking the forecast at each checkpoint for the hour the truck gets there. This can
-        take up to a minute.
-      </p>
       <p className="elapsed" aria-hidden="true">
         {seconds} s
       </p>

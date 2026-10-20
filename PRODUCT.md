@@ -10,7 +10,7 @@ web
 A freight dispatcher at a desk (laptop) planning a truck trip before departure. They compare candidate routes, pick the safest sensible one, and pass it to the driver. The same flow is what Spotter assessment reviewers will walk through.
 
 ## Product Purpose
-Truck Route Weather compares 3 truck (HGV) routes between two US places by the weather risk the truck will meet along each one. Success: the dispatcher sees, in one glance, which route is recommended and why, and where and when the risk sits along the way.
+Truck Router compares 3 truck (HGV) routes between two US places by the weather risk the truck will meet along each one. Success: the dispatcher sees, in one glance, which route is recommended and why, and where and when the risk sits along the way.
 
 ## Positioning
 Risk is scored where the truck will be at each hour (forecast at each checkpoint's ETA), not "weather at origin and destination now". The load weight changes the wind risk.
@@ -26,7 +26,7 @@ Risk is scored where the truck will be at each hour (forecast at each checkpoint
 - Stack: Vite + React + TypeScript + MapLibre GL frontend (Vercel); Django + DRF backend (Railway).
 
 ## Brand Commitments
-- Name: "Truck Route Weather".
+- Name: "Truck Router".
 - Binding visual request from the user: an orange background theme, motion/animation, and a truck animation while a plan loads.
 - Results are shown on a full-screen map with a route side sheet (bottom sheet on mobile), not below the form.
 
