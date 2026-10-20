@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { fetchPlan } from './api'
 import MapView from './MapView'
+import RouteCards from './RouteCards'
 import TripForm from './TripForm'
 import type { Plan, PlanRequest } from './types'
 
@@ -8,6 +9,7 @@ export default function App() {
   const [plan, setPlan] = useState<Plan | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [selected, setSelected] = useState(0)
   const latest = useRef(0) // ignore responses from superseded requests
 
   async function runPlan(req: PlanRequest) {
@@ -16,7 +18,10 @@ export default function App() {
     setError(null)
     try {
       const result = await fetchPlan(req)
-      if (id === latest.current) setPlan(result)
+      if (id === latest.current) {
+        setPlan(result)
+        setSelected(result.recommended)
+      }
     } catch (err) {
       if (id === latest.current) setError(err instanceof Error ? err.message : 'Something went wrong.')
     } finally {
@@ -53,13 +58,14 @@ export default function App() {
                   {w}
                 </p>
               ))}
+              <RouteCards plan={plan} selected={selected} onSelect={setSelected} />
             </section>
           )}
         </div>
       </main>
 
       <section className="map-section" aria-label="Route map">
-        <MapView />
+        <MapView plan={plan} selected={selected} onSelect={setSelected} />
       </section>
     </>
   )

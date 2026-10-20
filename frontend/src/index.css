@@ -303,3 +303,109 @@ button:disabled {
     height: 60vh;
   }
 }
+
+/* ---- route cards ---- */
+
+.route-cards {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.route-card {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 16px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text);
+  text-align: left;
+  background: rgb(255 255 255 / 0.04);
+  border: 2px solid #22344d;
+  border-left: 6px solid var(--route);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.route-card:hover {
+  background: rgb(255 255 255 / 0.08);
+}
+
+.route-card[aria-pressed='true'] {
+  background: rgb(255 255 255 / 0.1);
+  border-color: var(--route);
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--strong);
+}
+
+.swatch {
+  width: 14px;
+  height: 4px;
+  background: var(--route);
+  border-radius: 2px;
+}
+
+.badge {
+  margin-left: auto;
+  padding: 2px 10px;
+  font-size: 13px;
+  color: var(--button-text);
+  background: var(--selected);
+  border-radius: 999px;
+}
+
+.risk-bar {
+  display: flex;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.levels {
+  font-size: 14px;
+}
+
+/* ---- map legend + popups ---- */
+
+.legend {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--strong);
+  list-style: none;
+  background: rgb(11 26 44 / 0.85);
+  border-radius: 8px;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.maplibregl-popup-content {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--field-text);
+}
